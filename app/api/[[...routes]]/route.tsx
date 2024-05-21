@@ -79,12 +79,17 @@ app.frame("/airdrop", async (c) => {
   let walletAddress = c.previousState.walletAddress
 
   if (!walletAddress) {
-    const {
-      trustedData: { messageBytes },
-    } = await c.req.json()
-    const validatedData = await validateAction(messageBytes)
-    walletAddress = validatedData.action.interactor.verified_addresses
-      .eth_addresses[0] as Address
+    try {
+      const {
+        trustedData: { messageBytes },
+      } = await c.req.json()
+      const validatedData = await validateAction(messageBytes)
+      walletAddress = validatedData.action.interactor.verified_addresses
+        .eth_addresses[0] as Address
+    } catch (error) {
+      console.error(error)
+      return c.error({ message: "Couldn't resolve wallet address" })
+    }
   }
   if (!walletAddress) {
     return c.res({
